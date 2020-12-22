@@ -1,6 +1,6 @@
 #!/user/bin/env python3
 
-inp = "input1.txt"
+inp = "input.txt"
 numbers = list(map(lambda x: int(x) ,open(inp).read().strip().split('\n')))
 
 

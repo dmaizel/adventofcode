@@ -1,4 +1,4 @@
-inp = "input2.txt"
+inp = "input.txt"
 
 lines = open(inp).read().strip().split('\n')
 
