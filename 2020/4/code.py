@@ -1,6 +1,6 @@
 import re
 
-def readFile():
+def read_file():
     result = []
     with open(f"input.txt", "r") as f:
         for data in f.read().split("\n\n"):
@@ -27,7 +27,7 @@ def part2(passports):
     return sum((all((re.fullmatch(patterns[k], passport[k]) for k in passport)) for passport in passports))
 
 if __name__ == "__main__":
-    passports = readFile()
+    passports = read_file()
     valid_passports = [passport for passport in passports if assert_all_required_fields(passport)]
     print(f"Part 1: {part1(valid_passports)}")
     print(f"Part 2: {part2(valid_passports)}")
