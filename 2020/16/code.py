@@ -22,6 +22,9 @@ def prepare_dict(data):
 def inclusive_range(x, y):
     return [*range(x, y+1)]
 
+def is_in_range(num, rules):
+    return any([int(rule[0]) <= num <= int(rule[1]) for rule in rules])
+
 def part1(data_dict):
     nearby_tickets = data_dict['nearby tickets']
     rules = data_dict['rules']
@@ -59,10 +62,8 @@ def part2(data_dict, invalid_indexes):
 
     for rule in data_dict['rules']:
         rule_range = data_dict['rules'][rule] 
-        range1 = inclusive_range(*[int(num) for num in rule_range[0]])
-        range2 = inclusive_range(*[int(num) for num in rule_range[1]])
         for i in range(len(data_dict['rules'])):
-            if all(int(ticket[i]) in range1 or int(ticket[i]) in range2 for ticket in valid_tickets):
+            if all(is_in_range(int(ticket[i]), rule_range) for ticket in valid_tickets):
                 if rule not in rule_to_pos_dict:
                     rule_to_pos_dict[rule] = []
                 else:
