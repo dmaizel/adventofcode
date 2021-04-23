@@ -2,104 +2,57 @@ import re
 
 def readFile():
     with open("input.txt", "r") as f:
-        return f.read().split('\n\n')
+        return f.read().strip()
 
-def prepare_dict(data):
-    rules_regex = r'([\s\w]+): (\d+-\d+) or (\d+-\d+)'
-    dic = {'rules': {}}
-    for line in data[0].split('\n'):
-        m = re.search(rules_regex, line)
-        rule = m.group(1)
-        valid_1 = m.group(2)
-        valid_2 = m.group(3)
-        dic['rules'][rule] = [tuple(valid_1.split('-')), tuple(valid_2.split('-'))]
+def prepare_data(raw_data):
+    rules_raw, myticket_raw, others_raw = [x.split('\n') for x in raw_data.split('\n\n')]
+    
+    rules = {}
+    for rule in rules_raw:
+        match = re.match(r"(.+): (\d+)-(\d+) or (\d+)-(\d+)", rule)
+        name = match.group(1)
+        nums = list(map(int, match.groups()[1:]))
+        rules[name] = nums
 
-    dic['your ticket'] = data[1].split(':\n')[1].split(',') 
-    dic['nearby tickets'] = [x.split(',') for x in data[2].split(':\n')[1].split('\n')[:-1]]
+    others = [list(map(int, x.split(','))) for x in others_raw[1:]]
+    myticket = list(map(int, myticket_raw[1].split(',')))
 
-    return dic
-
-def inclusive_range(x, y):
-    return [*range(x, y+1)]
+    return rules, others, myticket
 
 def is_in_range(num, rules):
-    return any([int(rule[0]) <= num <= int(rule[1]) for rule in rules])
+    return any([v[0] <= num <= v[1] or v[2] <= num <= v[3] for v in rules.values()])
 
-def part1(data_dict):
-    nearby_tickets = data_dict['nearby tickets']
-    rules = data_dict['rules']
+def part1(rules, others):
     error_rate = 0
     valid_ranges = []
     invalid_indexes = []
 
-    for rule in data_dict['rules']:
-        ranges = [r for r in data_dict['rules'][rule]]
-        valid_ranges += ranges
+    return sum([num for other in others for num in other if not is_in_range(num, rules)])
 
-    for index, ticket in enumerate(nearby_tickets):
-        lists = [*(inclusive_range(*([int(num) for num in r])) for r in valid_ranges)]
-        combined = [item for sublist in lists for item in sublist]
-        for number in ticket:
-            number = int(number)
-            if number not in combined:
-                error_rate += number
-                invalid_indexes.append(index)
+def part2(rules, others, myticket):
+    valid_others = [other for other in others if all([is_in_range(num,rules) for num in other])]
+    
+    occurences = {}
+    for name, ranges in rules.items():
+        occurences[name] = [i for i in range(len(rules)) if all([is_in_range(l[i], {name: ranges}) for l in valid_others])]
 
-    return error_rate, invalid_indexes
+    sorted_occurences = dict(sorted(occurences.items(), key=lambda item: len(item[1])))
 
-def part2(data_dict, invalid_indexes):
-    nearby_tickets = data_dict['nearby tickets']
-    your_ticket = data_dict['your ticket']
-    rules = data_dict['rules']
-    error_rate = 0
-    valid_tickets = []
+    matches = {}
 
-    for i, _ in enumerate(nearby_tickets):
-        if i not in invalid_indexes:
-            valid_tickets.append(nearby_tickets[i])
-
-    rule_to_pos_dict = {}
-
-    for rule in data_dict['rules']:
-        rule_range = data_dict['rules'][rule] 
-        for i in range(len(data_dict['rules'])):
-            if all(is_in_range(int(ticket[i]), rule_range) for ticket in valid_tickets):
-                if rule not in rule_to_pos_dict:
-                    rule_to_pos_dict[rule] = []
-                else:
-                    rule_to_pos_dict[rule].append(i)
+    for name, possibilities in sorted_occurences.items():
+        index = [i for i in possibilities if i not in matches][0]
+        matches[index] = name
 
     res = 1
-    occ = {}
-    new_role_to_pos = {}
-    for rule in data_dict['rules']:
-        num_list = rule_to_pos_dict[rule]
-        for num in num_list:
-            if num in occ:
-                occ[num].append(rule)
-            else:
-                occ[num] = [rule]
-
-    sorted_occ = dict(sorted(occ.items(), key=lambda item: len(item[1])))
-
-    for k, v in sorted_occ.items():
-        if v:
-            rule = v[0]
-            new_role_to_pos[rule] = k
-            for ki, vi in sorted_occ.items():
-                if rule in vi:
-                    vi.remove(rule)
-
-    for n in [v for k,v in new_role_to_pos.items() if k.startswith('departure')]:
-        res *= int(your_ticket[n])
-
+    for index, value in enumerate(myticket):
+        if 'departure' in matches[index]:
+            res *= value
+    
     return res
-        
-if __name__ == '__main__':
-    data = readFile()
-    data_dict = prepare_dict(data)
-    res1, invalid_indexes = part1(data_dict)
-    print(res1)
-    res2 = part2(data_dict, invalid_indexes)
-    print(res2)
 
+if __name__ == '__main__':
+    raw_data = readFile()
+    rules, others, myticket = prepare_data(raw_data)
+    print(part1(rules, others))
+    print(part2(rules, others, myticket))
