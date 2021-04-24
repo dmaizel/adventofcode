@@ -1,9 +1,5 @@
 from itertools import product
 
-def print_grid(l):
-    for line in l:
-        print(line)
-
 def read_file():
     with open('input.txt') as f:
         return f.read().strip().split('\n')
