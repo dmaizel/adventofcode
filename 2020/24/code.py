@@ -1,5 +1,3 @@
-from functools import lru_cache, wraps
-
 '''
 east(e) -> (1, 0)
 southeast(se) -> (1, -1)
@@ -23,10 +21,10 @@ dir_trans = {
 }
 
 def part1(tiles):
-    tiles_dict = {}
+    black_tiles = set()
 
     for tile in tiles:
-        cur = [0, 0]
+        cur = (0, 0)
         i = 0
         while i in range(len(tile)):
             if i+1 < len(tile) and str(tile[i: i+2]) in dir_trans:
@@ -35,58 +33,48 @@ def part1(tiles):
             else:
                 d = tile[i]
                 i += 1
-            cur = [a+b for a, b in zip(cur, dir_trans[d])]
+            cur = tuple([a+b for a, b in zip(cur, dir_trans[d])])
 
-        if str(cur) not in tiles_dict:
-            tiles_dict[str(cur)] = True
+        if cur not in black_tiles:
+            black_tiles.add(cur)
         else:
-            tiles_dict[str(cur)] = not tiles_dict[str(cur)]
+            black_tiles.remove(cur)
 
-    return len([x for x in tiles_dict.values() if x]), tiles_dict
+    return len(black_tiles), black_tiles
 
-#@lru_cache()
-def get_num_of_black_adj_tiles(tile, tiles_dict):
-    neighbors = get_neighbors(tile, tiles_dict)
-    return len([x for x in neighbors if x in tiles_dict and tiles_dict[x] == True])
+def get_num_of_black_adj_tiles(tile, black_tiles):
+    neighbors = get_neighbors(tile, black_tiles)
+    return len([x for x in neighbors if x in black_tiles])
 
-def get_neighbors(tile, tiles_dict):
-    adj = []
-    tile = eval(tile)
-    for d in dir_trans.values():
-        adj.append([a+b for a,b in zip(tile, d)])
+def get_neighbors(tile, black_tiles):
+    return [tuple(x) for x in [[a+b for a,b in zip(tile, d)] for d in dir_trans.values()]]
 
-    return [str(x) for x in adj]
-
-def solve(num_days, tiles_dict):
+def solve(num_days, black_tiles):
     for _ in range(num_days):
-        new_tiles_dict = tiles_dict.copy()
-        for tile, black in tiles_dict.items():
-            num_black_adj = get_num_of_black_adj_tiles(tile, tiles_dict)
-            if black and (num_black_adj == 0 or num_black_adj > 2):
-                new_tiles_dict[tile] = False
-            if not black and num_black_adj == 2:
-                new_tiles_dict[tile] = True
+        new_tiles = set()
+        to_check = set()
 
-            for n in get_neighbors(tile, tiles_dict):
-                if n in tiles_dict:
-                    continue
-                num_black_adj = get_num_of_black_adj_tiles(n, tiles_dict)
-                black = n in tiles_dict and tiles_dict[n]
-                if black and (num_black_adj == 0 or num_black_adj > 2):
-                    new_tiles_dict[n] = False
-                if not black and num_black_adj == 2:
-                    new_tiles_dict[n] = True
+        for tile in black_tiles:
+            to_check.add(tile)
+            for n in get_neighbors(tile, black_tiles):
+                to_check.add(n)
 
-        tiles_dict = new_tiles_dict
+        for tile in to_check:
+            num_black_adj = get_num_of_black_adj_tiles(tile, black_tiles)
+            if (tile in black_tiles and 0 < num_black_adj <= 2) or (
+                tile not in black_tiles and num_black_adj == 2
+            ):
+                new_tiles.add(tile)
+        black_tiles = new_tiles
 
-    return len([x for x in tiles_dict.values() if x]) 
+    return len(black_tiles) 
             
 def part2(black_tiles):
     return solve(100, black_tiles)
 
 if __name__ == '__main__':
     tiles = read_file()
-    res1, tiles_dict = part1(tiles)
+    res1, black_tiles = part1(tiles)
     print(res1)
-    res2 = part2(tiles_dict)
+    res2 = part2(black_tiles)
     print(res2)
