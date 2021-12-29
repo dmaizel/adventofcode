@@ -1,13 +1,15 @@
 BOARD_LEN = 5
 
+
 def read_file():
     boards_res = []
-    with open('input.txt') as f:
-        nums, *boards = f.read().split('\n\n')
-        nums = nums.split(',')
+    with open("input.txt") as f:
+        nums, *boards = f.read().split("\n\n")
+        nums = nums.split(",")
         for board in boards:
             boards_res.append([[x, False] for x in board.split()])
     return nums, boards_res
+
 
 def has_won(board):
     # Check rows
@@ -38,7 +40,7 @@ def part1(data):
                     break
             if has_won(board):
                 return int(num) * sum([int(x[0]) for x in board if x[1] == False])
-    raise AssersionError('Should not get here')
+    raise AssersionError("Should not get here")
 
 
 def part2(data):
@@ -57,11 +59,10 @@ def part2(data):
                     if i not in board_wins:
                         board_wins[i] = 1
 
-    raise AssersionError('Should not get here')
+    raise AssersionError("Should not get here")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     data = read_file()
     print(part1(data))
     print(part2(data))
-

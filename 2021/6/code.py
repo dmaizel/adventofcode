@@ -1,6 +1,7 @@
 def read_file():
-    with open('input.txt') as f :
-        return list(map(int, f.read().strip().split(',')))
+    with open("input.txt") as f:
+        return list(map(int, f.read().strip().split(",")))
+
 
 def solve(data, days):
     current_state = {
@@ -12,7 +13,7 @@ def solve(data, days):
         5: data.count(5),
         6: data.count(6),
         7: data.count(7),
-        8: data.count(8)
+        8: data.count(8),
     }
 
     for _ in range(days):
@@ -25,7 +26,7 @@ def solve(data, days):
             5: current_state[6],
             6: current_state[7],
             7: current_state[8],
-            8: current_state[0]
+            8: current_state[0],
         }
         if current_state[0] > 0:
             next_state[6] += current_state[0]
@@ -34,13 +35,16 @@ def solve(data, days):
 
     return sum(current_state.values())
 
+
 def part1(data):
     return solve(data, 80)
+
 
 def part2(data):
     return solve(data, 256)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     data = read_file()
     print(part1(data))
     print(part2(data))
