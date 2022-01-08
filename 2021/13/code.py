@@ -13,16 +13,12 @@ def solve(data, part1=False):
         fold_axis, fold_at = fold
         fold_at = int(fold_at)
         for (x, y) in dots:
-            if fold_axis == "y":
-                if y > fold_at:
-                    res.add((x, fold_at - (y - fold_at)))
-                else:
-                    res.add((x, y))
+            if fold_axis == "y" and y > fold_at:
+                res.add((x, fold_at - (y - fold_at)))
+            elif fold_axis == 'x' and x > fold_at:
+                res.add((fold_at - (x - fold_at), y))
             else:
-                if x > fold_at:
-                    res.add((fold_at - (x - fold_at), y))
-                else:
-                    res.add((x, y))
+                res.add((x, y))
         if part1:
             break
         dots = res
