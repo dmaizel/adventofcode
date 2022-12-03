@@ -1,4 +1,5 @@
 from heapq import heappop, heappush
+from typing import NewType
 import math
 
 
@@ -13,7 +14,8 @@ def read_file():
 
 def solve(grid, times):
     heap = [(0, 0, 0)]
-    seen = {(0, 0)}
+    SetOfCords = NewType('SetOfCords', set[tuple[int, int]])
+    seen = SetOfCords({(0,0)})
     L = math.sqrt(len(grid))
     l = times * L - 1
 
